@@ -431,7 +431,7 @@ export function LogsWorkspace() {
           <div className="flex items-center justify-between mt-5">
             <div className="flex items-center gap-2 text-sm font-medium">
               <FileText className="w-4 h-4" />
-              Log files
+              Log Files
             </div>
             <div className="flex items-center gap-2">
               <Badge variant="outline">{formatNumber(visibleFiles.length)} 個檔案</Badge>
@@ -576,8 +576,7 @@ export function LogsWorkspace() {
                   </Badge>
                 )}
               </div>
-              <h2 className="mt-1 flex min-w-0 items-center gap-2 text-lg font-semibold">
-                {workspaceMode === "report" && <BarChart3 className="h-5 w-5 shrink-0 text-muted-foreground" />}
+              <h2 className="flex items-center min-w-0 gap-2 mt-1 text-lg font-semibold">
                 <span className="truncate">
                   {workspaceMode === "report" ? "多檔 worker log 統計" : content.file?.name ?? "尚未選擇檔案"}
                 </span>
@@ -883,7 +882,7 @@ function ReportFilePicker({
               />
               <FieldLabel
                 htmlFor={`report-file-${file.relativePath}`}
-                className="flex min-w-0 flex-1 cursor-pointer items-center gap-2 text-sm"
+                className="flex items-center flex-1 min-w-0 gap-2 text-sm cursor-pointer"
               >
                 <FileText className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
                 <span className="truncate">{file.name}</span>
@@ -935,8 +934,8 @@ function WorkerReportView({
   ];
 
   return (
-    <div className="h-full overflow-auto p-4">
-      <div className="mx-auto max-w-6xl space-y-5">
+    <div className="h-full p-4 overflow-auto">
+      <div className="max-w-6xl mx-auto space-y-5">
         <section className="space-y-3">
           <div className="flex flex-wrap items-center gap-2">
             <h3 className="text-lg font-semibold">總覽</h3>
@@ -946,14 +945,14 @@ function WorkerReportView({
               </Badge>
             ))}
           </div>
-          <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-5">
+          <div className="grid gap-3 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 2xl:grid-cols-5">
             {overviewItems.map((item) => {
               const Icon = item.icon;
 
               return (
                 <Card key={item.label} className="flex min-h-[104px] flex-col justify-between p-4">
-                  <div className="flex min-w-0 items-start gap-2 text-xs leading-5 text-muted-foreground">
-                    <Icon className="h-4 w-4 shrink-0" />
+                  <div className="flex items-start min-w-0 gap-2 text-xs leading-5 text-muted-foreground">
+                    <Icon className="w-4 h-4 shrink-0" />
                     <span className="min-w-0 break-words">{item.label}</span>
                   </div>
                   <div className="text-2xl font-semibold tabular-nums">
@@ -1054,7 +1053,7 @@ function WorkerReportView({
               {report.otherStats.map((item) => (
                 <TableRow key={item.label}>
                   <ReportCell>{item.label}</ReportCell>
-                  <ReportCell className="text-right font-mono">{formatNumericText(item.value)}</ReportCell>
+                  <ReportCell className="font-mono text-right">{formatNumericText(item.value)}</ReportCell>
                 </TableRow>
               ))}
             </TableBody>
@@ -1133,7 +1132,7 @@ function ReportSection({
 
 function NumberCell({ value }: { value: number }) {
   return (
-    <ReportCell className="text-right font-mono tabular-nums">
+    <ReportCell className="font-mono text-right tabular-nums">
       {formatNumber(value)}
     </ReportCell>
   );
@@ -1142,7 +1141,7 @@ function NumberCell({ value }: { value: number }) {
 function ReportSkeleton() {
   return (
     <div className="h-full p-4 overflow-auto">
-      <div className="mx-auto max-w-6xl space-y-5">
+      <div className="max-w-6xl mx-auto space-y-5">
         <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-5">
           {Array.from({ length: 5 }).map((_, index) => (
             <Skeleton key={index} className="h-24 rounded-lg" />
