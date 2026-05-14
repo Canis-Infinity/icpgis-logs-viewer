@@ -2,11 +2,14 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import {
+  Activity,
   AlignLeft,
   ArrowUp,
   BarChart3,
   Bug,
   CalendarIcon,
+  CheckCircle2,
+  Clock3,
   CircleX,
   Database,
   Eraser,
@@ -18,6 +21,8 @@ import {
   Moon,
   RefreshCw,
   SlidersHorizontal,
+  SquareCheckBig,
+  SquareX,
   Sun,
   Table2,
   TriangleAlert
@@ -159,6 +164,9 @@ export function LogsWorkspace() {
     () => visibleFiles.filter((item) => item.name.startsWith("worker-") && item.extension === "log"),
     [visibleFiles]
   );
+  const areAllReportFilesSelected =
+    reportCandidateFiles.length > 0 &&
+    reportCandidateFiles.every((item) => selectedReportFiles.includes(item.relativePath));
 
   useEffect(() => {
     const stored = window.localStorage.getItem("logs-viewer-theme") as ThemeMode | null;
@@ -343,7 +351,14 @@ export function LogsWorkspace() {
   }
 
   function selectAllReportFiles() {
-    setSelectedReportFiles(reportCandidateFiles.map((item) => item.relativePath));
+    setSelectedReportFiles((current) => {
+      const reportFilePaths = reportCandidateFiles.map((item) => item.relativePath);
+      const allSelected =
+        reportFilePaths.length > 0 &&
+        reportFilePaths.every((item) => current.includes(item));
+
+      return allSelected ? [] : reportFilePaths;
+    });
   }
 
   function scrollToTop() {
@@ -489,6 +504,7 @@ export function LogsWorkspace() {
                   <ReportFilePicker
                     files={reportCandidateFiles}
                     selectedFiles={selectedReportFiles}
+                    areAllSelected={areAllReportFilesSelected}
                     onToggle={toggleReportFile}
                     onSelectAll={selectAllReportFiles}
                     onRefresh={loadReport}
@@ -539,7 +555,11 @@ export function LogsWorkspace() {
           <div className="flex flex-col gap-3 px-4 py-3 border-b shrink-0 border-border sm:flex-row sm:items-center sm:justify-between">
             <div className="min-w-0">
               <div className="flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
-                <FileText className="w-4 h-4" />
+                {workspaceMode === "report" ? (
+                  <BarChart3 className="w-4 h-4" />
+                ) : (
+                  <FileText className="w-4 h-4" />
+                )}
                 <span className="truncate">
                   {workspaceMode === "report" ? "Worker 彙總報表" : content.file?.sourceLabel ?? "尚未選擇來源"}
                 </span>
@@ -556,8 +576,11 @@ export function LogsWorkspace() {
                   </Badge>
                 )}
               </div>
-              <h2 className="mt-1 text-lg font-semibold truncate">
-                {workspaceMode === "report" ? "多檔 worker log 統計" : content.file?.name ?? "尚未選擇檔案"}
+              <h2 className="mt-1 flex min-w-0 items-center gap-2 text-lg font-semibold">
+                {workspaceMode === "report" && <BarChart3 className="h-5 w-5 shrink-0 text-muted-foreground" />}
+                <span className="truncate">
+                  {workspaceMode === "report" ? "多檔 worker log 統計" : content.file?.name ?? "尚未選擇檔案"}
+                </span>
               </h2>
             </div>
             {workspaceMode === "logs" && (
@@ -801,12 +824,14 @@ function MobileDrawer({
 function ReportFilePicker({
   files,
   selectedFiles,
+  areAllSelected,
   onToggle,
   onSelectAll,
   onRefresh
 }: {
   files: PublicLogFile[];
   selectedFiles: string[];
+  areAllSelected: boolean;
   onToggle: (relativePath: string, checked: boolean) => void;
   onSelectAll: () => void;
   onRefresh: () => void;
@@ -821,8 +846,9 @@ function ReportFilePicker({
           </FieldDescription>
         </div>
         <div className="flex gap-2">
-          <Button variant="outline" size="sm" onClick={onSelectAll}>
-            全選
+          <Button variant="outline" size="sm" onClick={onSelectAll} disabled={files.length === 0}>
+            {areAllSelected ? <SquareX className="w-4 h-4" /> : <SquareCheckBig className="w-4 h-4" />}
+            {areAllSelected ? "取消全選" : "全選"}
           </Button>
           <Button variant="default" size="sm" onClick={onRefresh}>
             <RefreshCw className="w-4 h-4" />
@@ -901,11 +927,11 @@ function WorkerReportView({
   }
 
   const overviewItems = [
-    { label: "Worker 總執行次數", value: report.overview.workerRuns },
-    { label: "hourly 排程執行次數", value: report.overview.hourlyRuns },
-    { label: "force-recalculate-risk 執行次數", value: report.overview.forceRecalculateRiskRuns },
-    { label: "成功次數", value: report.overview.succeededRuns },
-    { label: "失敗次數", value: report.overview.failedRuns }
+    { label: "Worker 總執行次數", value: report.overview.workerRuns, icon: Activity },
+    { label: "hourly 排程執行次數", value: report.overview.hourlyRuns, icon: Clock3 },
+    { label: "force-recalculate-risk 執行次數", value: report.overview.forceRecalculateRiskRuns, icon: RefreshCw },
+    { label: "成功次數", value: report.overview.succeededRuns, icon: CheckCircle2 },
+    { label: "失敗次數", value: report.overview.failedRuns, icon: CircleX }
   ];
 
   return (
@@ -921,14 +947,21 @@ function WorkerReportView({
             ))}
           </div>
           <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-5">
-            {overviewItems.map((item) => (
-              <Card key={item.label} className="p-4">
-                <div className="text-xs text-muted-foreground">{item.label}</div>
-                <div className="mt-2 text-2xl font-semibold tabular-nums">
-                  {formatNumber(item.value)}
-                </div>
-              </Card>
-            ))}
+            {overviewItems.map((item) => {
+              const Icon = item.icon;
+
+              return (
+                <Card key={item.label} className="flex min-h-[104px] flex-col justify-between p-4">
+                  <div className="flex min-w-0 items-start gap-2 text-xs leading-5 text-muted-foreground">
+                    <Icon className="h-4 w-4 shrink-0" />
+                    <span className="min-w-0 break-words">{item.label}</span>
+                  </div>
+                  <div className="text-2xl font-semibold tabular-nums">
+                    {formatNumber(item.value)}
+                  </div>
+                </Card>
+              );
+            })}
           </div>
         </section>
 
