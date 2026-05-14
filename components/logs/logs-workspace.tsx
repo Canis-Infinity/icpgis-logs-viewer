@@ -20,8 +20,7 @@ import {
   SlidersHorizontal,
   Sun,
   Table2,
-  TriangleAlert,
-  X
+  TriangleAlert
 } from "lucide-react";
 import { format } from "date-fns";
 import type { DateRange } from "react-day-picker";
@@ -139,6 +138,7 @@ export function LogsWorkspace() {
   const [selectedEntryId, setSelectedEntryId] = useState<string | null>(null);
   const [selectedReportFiles, setSelectedReportFiles] = useState<string[]>([]);
   const [reportFilesInitialized, setReportFilesInitialized] = useState(false);
+  const isDesktop = useMediaQuery("(min-width: 1280px)");
 
   const visibleFiles = useMemo(() => {
     return summary.files.filter((item) => {
@@ -577,9 +577,7 @@ export function LogsWorkspace() {
           </div>
 
           <div
-            className={`grid min-h-[420px] flex-1 gap-0 xl:min-h-0 ${
-              selectedEntry && workspaceMode === "logs" ? "xl:grid-cols-[minmax(0,1fr)_390px]" : "xl:grid-cols-1"
-            }`}
+            className="grid min-h-[420px] flex-1 gap-0 xl:min-h-0 xl:grid-cols-1"
           >
             <div className="min-w-0 min-h-0">
               {workspaceMode === "report" ? (
@@ -592,13 +590,6 @@ export function LogsWorkspace() {
                 <TableLogView entries={content.entries} onSelect={setSelectedEntryId} selectedId={selectedEntryId} />
               )}
             </div>
-            {selectedEntry && workspaceMode === "logs" && (
-              <EntryDetails
-                entry={selectedEntry}
-                onClose={() => setSelectedEntryId(null)}
-                className="hidden xl:block"
-              />
-            )}
           </div>
           <footer className="px-4 py-3 text-xs border-t shrink-0 text-muted-foreground">
             © logs_viewer
@@ -608,7 +599,7 @@ export function LogsWorkspace() {
 
       <MobileDrawer
         title="選擇 Log file"
-        open={showFilePicker}
+        open={!isDesktop && showFilePicker}
         onOpenChange={setShowFilePicker}
       >
         <div className="space-y-2">
@@ -618,7 +609,7 @@ export function LogsWorkspace() {
 
       <MobileDrawer
         title="詳細資訊"
-        open={selectedEntry !== null}
+        open={!isDesktop && selectedEntry !== null}
         onOpenChange={(open) => {
           if (!open) setSelectedEntryId(null);
         }}
@@ -626,12 +617,25 @@ export function LogsWorkspace() {
         {selectedEntry && (
           <EntryDetails
             entry={selectedEntry}
-            onClose={() => setSelectedEntryId(null)}
             className="h-auto p-0 border-0"
-            showCloseButton={false}
           />
         )}
       </MobileDrawer>
+
+      <DesktopDrawer
+        title="詳細資訊"
+        open={isDesktop && selectedEntry !== null}
+        onOpenChange={(open) => {
+          if (!open) setSelectedEntryId(null);
+        }}
+      >
+        {selectedEntry && (
+          <EntryDetails
+            entry={selectedEntry}
+            className="h-auto p-0 border-0"
+          />
+        )}
+      </DesktopDrawer>
 
       <Button
         variant="default"
@@ -661,6 +665,21 @@ function FormField({
       {children}
     </Field>
   );
+}
+
+function useMediaQuery(query: string) {
+  const [matches, setMatches] = useState(false);
+
+  useEffect(() => {
+    const mediaQuery = window.matchMedia(query);
+    const updateMatches = () => setMatches(mediaQuery.matches);
+
+    updateMatches();
+    mediaQuery.addEventListener("change", updateMatches);
+    return () => mediaQuery.removeEventListener("change", updateMatches);
+  }, [query]);
+
+  return matches;
 }
 
 function LogFileList({
@@ -711,6 +730,41 @@ function LogFileList({
         </button>
       ))}
     </>
+  );
+}
+
+function DesktopDrawer({
+  title,
+  open,
+  onOpenChange,
+  children
+}: {
+  title: string;
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  children: React.ReactNode;
+}) {
+  return (
+    <Drawer
+      open={open}
+      onOpenChange={onOpenChange}
+      direction="right"
+      shouldScaleBackground={false}
+    >
+      <DrawerContent className="hidden border-l-0 xl:flex xl:w-[min(560px,44vw)] xl:max-w-none">
+        <div className="flex flex-col flex-1 min-h-0">
+          <DrawerHeader className="text-left border-b">
+            <DrawerTitle>{title}</DrawerTitle>
+            <DrawerDescription className="sr-only">
+              {title}
+            </DrawerDescription>
+          </DrawerHeader>
+          <div className="flex-1 min-h-0 p-4 overflow-auto">
+            {children}
+          </div>
+        </div>
+      </DrawerContent>
+    </Drawer>
   );
 }
 
@@ -1383,14 +1437,10 @@ function TableLogSkeleton() {
 
 function EntryDetails({
   entry,
-  onClose,
-  className,
-  showCloseButton = true
+  className
 }: {
   entry: LogEntry;
-  onClose: () => void;
   className?: string;
-  showCloseButton?: boolean;
 }) {
   const entries = Object.entries(entry.fields);
   const pinned = pinnedFields
@@ -1402,7 +1452,7 @@ function EntryDetails({
   return (
     <aside
       className={cn(
-        "h-full p-4 overflow-auto border-t border-border bg-card xl:border-l xl:border-t-0",
+        "h-full p-4 overflow-auto bg-card",
         className
       )}
     >
@@ -1416,11 +1466,6 @@ function EntryDetails({
         </div>
         <div className="flex items-center gap-2">
           <Badge variant="outline">{entry.type}</Badge>
-          {showCloseButton && (
-            <Button variant="ghost" size="icon" onClick={onClose} title="關閉詳細資訊">
-              <X className="w-4 h-4" />
-            </Button>
-          )}
         </div>
       </div>
 
