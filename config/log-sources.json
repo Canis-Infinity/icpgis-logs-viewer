@@ -1,0 +1,12 @@
+{
+  "sources": [
+    {
+      "id": "bg-worker",
+      "label": "背景 Worker",
+      "paths": ["../icpgis_bg_worker/logs"],
+      "filePatterns": ["*.log", "*.json"]
+    }
+  ],
+  "maxReadBytes": 5242880,
+  "maxRows": 2000
+}
