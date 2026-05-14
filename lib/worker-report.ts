@@ -161,22 +161,22 @@ function buildConclusions(
       title: "排程執行狀態",
       description:
         failedRuns === 0
-          ? `${workerRuns} 次 worker 中有 ${succeededRuns} 次完成，未看到失敗完成紀錄。`
-          : `${workerRuns} 次 worker 中有 ${succeededRuns} 次完成，${failedRuns} 次失敗。`
+          ? `${formatNumber(workerRuns)} 次 worker 中有 ${formatNumber(succeededRuns)} 次完成，未看到失敗完成紀錄。`
+          : `${formatNumber(workerRuns)} 次 worker 中有 ${formatNumber(succeededRuns)} 次完成，${formatNumber(failedRuns)} 次失敗。`
     },
     {
       title: "KCG 抓取方式",
-      description: kcg ? `${kcg.fetchDoneRuns} 次都是 HTTP 直接完成。` : "未看到 KCG 抓取紀錄。"
+      description: kcg ? `${formatNumber(kcg.fetchDoneRuns)} 次都是 HTTP 直接完成。` : "未看到 KCG 抓取紀錄。"
     },
     {
       title: "THB 抓取方式",
       description: thb
-        ? `HTTP 直接成功 ${thb.httpCompleted} 次，Playwright 完成 ${thb.playwrightCompleted} 次，其中 Chromium 使用 ${thb.chromiumUsed} 次。`
+        ? `HTTP 直接成功 ${formatNumber(thb.httpCompleted)} 次，Playwright 完成 ${formatNumber(thb.playwrightCompleted)} 次，其中 Chromium 使用 ${formatNumber(thb.chromiumUsed)} 次。`
         : "未看到 THB 抓取紀錄。"
     },
     {
       title: "風險重算",
-      description: `重新計算 ${riskRecalculated} 次，略過 ${riskSkipped} 次。`
+      description: `重新計算 ${formatNumber(riskRecalculated)} 次，略過 ${formatNumber(riskSkipped)} 次。`
     }
   ];
 }
@@ -261,15 +261,22 @@ function formatDistinct<K extends keyof DailyAccumulator>(
 ) {
   const values = Array.from(new Set(Array.from(stats.values()).map((item) => item[key]).filter(Boolean)));
   if (values.length === 0) return "0";
-  return values.map(String).join("、");
+  return values.map((value) => (typeof value === "number" ? formatNumber(value) : String(value))).join("、");
 }
 
 function formatAverageDuration(values: number[]) {
   if (values.length === 0) return "-";
   const averageMs = values.reduce((total, value) => total + value, 0) / values.length;
-  return `約 ${(averageMs / 1000).toFixed(1)} 秒`;
+  return `約 ${formatDecimal(averageMs / 1000, 1)} 秒`;
 }
 
 function formatNumber(value: number) {
   return value.toLocaleString("zh-TW");
+}
+
+function formatDecimal(value: number, fractionDigits: number) {
+  return value.toLocaleString("zh-TW", {
+    minimumFractionDigits: fractionDigits,
+    maximumFractionDigits: fractionDigits
+  });
 }

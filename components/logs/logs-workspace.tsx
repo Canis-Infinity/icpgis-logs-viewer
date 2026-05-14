@@ -419,7 +419,7 @@ export function LogsWorkspace() {
               Log files
             </div>
             <div className="flex items-center gap-2">
-              <Badge variant="outline">{visibleFiles.length} 個檔案</Badge>
+              <Badge variant="outline">{formatNumber(visibleFiles.length)} 個檔案</Badge>
               <Button
                 variant="outline"
                 size="sm"
@@ -449,12 +449,12 @@ export function LogsWorkspace() {
                   {workspaceMode === "report" ? (
                     <>
                       <BarChart3 className="h-3.5 w-3.5" />
-                      {selectedReportFiles.length.toLocaleString()} 個報表檔案
+                      {formatNumber(selectedReportFiles.length)} 個報表檔案
                     </>
                   ) : (
                     <>
                       <FileText className="h-3.5 w-3.5" />
-                      {content.entries.length.toLocaleString()} 筆結果
+                      {formatNumber(content.entries.length)} 筆結果
                     </>
                   )}
                 </Badge>
@@ -871,7 +871,7 @@ function WorkerReportView({
               <Card key={item.label} className="p-4">
                 <div className="text-xs text-muted-foreground">{item.label}</div>
                 <div className="mt-2 text-2xl font-semibold tabular-nums">
-                  {item.value.toLocaleString()}
+                  {formatNumber(item.value)}
                 </div>
               </Card>
             ))}
@@ -882,18 +882,18 @@ function WorkerReportView({
           <Table className="min-w-[760px]">
             <TableHeader>
               <TableRow>
-                <TableHead>來源</TableHead>
-                <TableHead className="text-right">抓取完成次數</TableHead>
-                <TableHead className="text-right">HTTP 直接完成</TableHead>
-                <TableHead className="text-right">Playwright 完成</TableHead>
-                <TableHead className="text-right">其中使用 Chromium</TableHead>
-                <TableHead className="text-right">失敗</TableHead>
+                <ReportHead>來源</ReportHead>
+                <ReportHead align="right">抓取完成次數</ReportHead>
+                <ReportHead align="right">HTTP 直接完成</ReportHead>
+                <ReportHead align="right">Playwright 完成</ReportHead>
+                <ReportHead align="right">其中使用 Chromium</ReportHead>
+                <ReportHead align="right">失敗</ReportHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {report.sourceStats.map((item) => (
                 <TableRow key={item.source}>
-                  <TableCell className="font-medium">{item.source}</TableCell>
+                  <ReportCell className="font-medium">{item.source}</ReportCell>
                   <NumberCell value={item.fetchDoneRuns} />
                   <NumberCell value={item.httpCompleted} />
                   <NumberCell value={item.playwrightCompleted} />
@@ -906,26 +906,26 @@ function WorkerReportView({
         </ReportSection>
 
         <ReportSection title="每日統計">
-          <Table className="min-w-[1100px]">
+          <Table className="min-w-[1280px]">
             <TableHeader>
               <TableRow>
-                <TableHead>日期</TableHead>
-                <TableHead className="text-right">Worker 總次數</TableHead>
-                <TableHead className="text-right">hourly</TableHead>
-                <TableHead className="text-right">force-recalculate-risk</TableHead>
-                <TableHead className="text-right">成功</TableHead>
-                <TableHead className="text-right">KCG 筆數合計</TableHead>
-                <TableHead className="text-right">THB 筆數合計</TableHead>
-                <TableHead className="text-right">THB Playwright 次數</TableHead>
-                <TableHead className="text-right">THB HTTP 次數</TableHead>
-                <TableHead className="text-right">風險寫入筆數</TableHead>
-                <TableHead className="text-right">RoadName 有值</TableHead>
+                <ReportHead>日期</ReportHead>
+                <ReportHead align="right">Worker 總次數</ReportHead>
+                <ReportHead align="right">hourly</ReportHead>
+                <ReportHead align="right">force-recalculate-risk</ReportHead>
+                <ReportHead align="right">成功</ReportHead>
+                <ReportHead align="right">KCG 筆數合計</ReportHead>
+                <ReportHead align="right">THB 筆數合計</ReportHead>
+                <ReportHead align="right">THB Playwright 次數</ReportHead>
+                <ReportHead align="right">THB HTTP 次數</ReportHead>
+                <ReportHead align="right">風險寫入筆數</ReportHead>
+                <ReportHead align="right">RoadName 有值</ReportHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {report.dailyStats.map((item) => (
                 <TableRow key={item.date}>
-                  <TableCell className="font-mono text-xs">{item.date}</TableCell>
+                  <ReportCell className="font-mono">{item.date}</ReportCell>
                   <NumberCell value={item.workerRuns} />
                   <NumberCell value={item.hourlyRuns} />
                   <NumberCell value={item.forceRecalculateRiskRuns} />
@@ -939,7 +939,7 @@ function WorkerReportView({
                 </TableRow>
               ))}
               <TableRow>
-                <TableCell className="font-medium">合計</TableCell>
+                <ReportCell className="font-semibold">合計</ReportCell>
                 <NumberCell value={sumReportField(report.dailyStats, "workerRuns")} />
                 <NumberCell value={sumReportField(report.dailyStats, "hourlyRuns")} />
                 <NumberCell value={sumReportField(report.dailyStats, "forceRecalculateRiskRuns")} />
@@ -959,15 +959,15 @@ function WorkerReportView({
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>項目</TableHead>
-                <TableHead className="text-right">統計</TableHead>
+                <ReportHead>項目</ReportHead>
+                <ReportHead align="right">統計</ReportHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {report.otherStats.map((item) => (
                 <TableRow key={item.label}>
-                  <TableCell>{item.label}</TableCell>
-                  <TableCell className="text-right font-mono text-xs">{item.value}</TableCell>
+                  <ReportCell>{item.label}</ReportCell>
+                  <ReportCell className="text-right font-mono">{formatNumericText(item.value)}</ReportCell>
                 </TableRow>
               ))}
             </TableBody>
@@ -978,15 +978,15 @@ function WorkerReportView({
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead className="w-48">結論</TableHead>
-                <TableHead>說明</TableHead>
+                <ReportHead className="w-48">結論</ReportHead>
+                <ReportHead>說明</ReportHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {report.conclusions.map((item) => (
                 <TableRow key={item.title}>
-                  <TableCell className="font-medium">{item.title}</TableCell>
-                  <TableCell>{item.description}</TableCell>
+                  <ReportCell className="font-medium">{item.title}</ReportCell>
+                  <ReportCell>{item.description}</ReportCell>
                 </TableRow>
               ))}
             </TableBody>
@@ -995,6 +995,38 @@ function WorkerReportView({
       </div>
     </div>
   );
+}
+
+function ReportHead({
+  align = "left",
+  className,
+  children
+}: {
+  align?: "left" | "right";
+  className?: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <TableHead
+      className={cn(
+        "h-10 whitespace-nowrap text-xs font-medium text-muted-foreground",
+        align === "right" && "text-right",
+        className
+      )}
+    >
+      {children}
+    </TableHead>
+  );
+}
+
+function ReportCell({
+  className,
+  children
+}: {
+  className?: string;
+  children: React.ReactNode;
+}) {
+  return <TableCell className={cn("text-sm", className)}>{children}</TableCell>;
 }
 
 function ReportSection({
@@ -1014,9 +1046,9 @@ function ReportSection({
 
 function NumberCell({ value }: { value: number }) {
   return (
-    <TableCell className="text-right font-mono text-xs tabular-nums">
-      {value.toLocaleString()}
-    </TableCell>
+    <ReportCell className="text-right font-mono tabular-nums">
+      {formatNumber(value)}
+    </ReportCell>
   );
 }
 
@@ -1180,7 +1212,7 @@ function LevelFilterGroup({
                 <Icon className="h-3.5 w-3.5 shrink-0" />
                 <span className="truncate">{levelLabel(item.level)}</span>
                 <span className="ml-auto text-xs shrink-0 text-muted-foreground">
-                  {item.count.toLocaleString()}
+                  {formatNumber(item.count)}
                 </span>
               </FieldLabel>
             </Field>
@@ -1218,14 +1250,14 @@ function PlainLogView({
         entries.map((entry) => (
           <button
             key={entry.id}
-            className={`grid w-full grid-cols-[2.5rem_minmax(0,1fr)] rounded px-2 py-0.5 text-left font-mono hover:bg-accent/70 dark:hover:bg-white/10 ${
+            className={`grid w-full grid-cols-[4rem_minmax(0,1fr)] rounded px-2 py-0.5 text-left font-mono hover:bg-accent/70 dark:hover:bg-white/10 ${
               selectedId === entry.id ? "log-line-selected" : ""
             }`}
             onClick={() => onSelect(entry.id)}
           >
-            <span className="text-right select-none text-muted-foreground">{entry.lineNumber}</span>
+            <span className="text-right select-none text-muted-foreground">{formatNumber(entry.lineNumber)}</span>
             <span className="min-w-0 pl-3 break-words whitespace-pre-wrap">
-              <HighlightedLine line={entry.raw} />
+              <HighlightedLine line={formatNumericText(entry.raw)} />
             </span>
           </button>
         ))
@@ -1300,17 +1332,17 @@ function TableLogView({
               className="cursor-pointer"
               onClick={() => onSelect(entry.id)}
             >
-              <TableCell className="font-mono text-xs text-muted-foreground">{entry.lineNumber}</TableCell>
+              <TableCell className="font-mono text-xs text-muted-foreground">{formatNumber(entry.lineNumber)}</TableCell>
               <TableCell>
                 <LevelBadge level={entry.level} />
               </TableCell>
               <TableCell className="font-mono text-xs">{formatTimestamp(entry.timestamp)}</TableCell>
-              <TableCell className="font-mono text-xs">{fieldValue(entry, "code")}</TableCell>
-              <TableCell className="truncate">{fieldValue(entry, "event")}</TableCell>
-              <TableCell className="truncate">{firstFieldValue(entry, ["job", "Job"])}</TableCell>
-              <TableCell className="max-w-[460px] truncate text-muted-foreground">{entry.message}</TableCell>
+              <TableCell className="font-mono text-xs">{formatNumericText(fieldValue(entry, "code"))}</TableCell>
+              <TableCell className="truncate">{formatNumericText(fieldValue(entry, "event"))}</TableCell>
+              <TableCell className="truncate">{formatNumericText(firstFieldValue(entry, ["job", "Job"]))}</TableCell>
+              <TableCell className="max-w-[460px] truncate text-muted-foreground">{formatNumericText(entry.message)}</TableCell>
               <TableCell className="font-mono text-xs">
-                {firstFieldValue(entry, ["elapsedMs", "durationMs"])}
+                {formatNumericText(firstFieldValue(entry, ["elapsedMs", "durationMs"]))}
               </TableCell>
             </TableRow>
           ))}
@@ -1379,7 +1411,7 @@ function EntryDetails({
           <div className="text-xs text-muted-foreground">Selected entry</div>
           <div className="flex items-center gap-2 mt-1">
             <LevelBadge level={entry.level} />
-            <span className="font-mono text-xs text-muted-foreground">#{entry.lineNumber}</span>
+            <span className="font-mono text-xs text-muted-foreground">#{formatNumber(entry.lineNumber)}</span>
           </div>
         </div>
         <div className="flex items-center gap-2">
@@ -1395,13 +1427,13 @@ function EntryDetails({
       <div className="mt-4 space-y-3">
         <DetailItem label="時間" value={entry.timestamp ?? "-"} />
         <DetailItem label="檔案" value={entry.fileName} />
-        <DetailItem label="訊息" value={entry.message} multiline />
+        <DetailItem label="訊息" value={formatNumericText(entry.message)} multiline />
       </div>
 
       <div className="mt-5">
         <div className="flex items-center justify-between mb-2">
           <h3 className="text-sm font-semibold">常用欄位</h3>
-          <Badge variant="outline">{pinned.length} 個</Badge>
+          <Badge variant="outline">{formatNumber(pinned.length)} 個</Badge>
         </div>
         <FieldGrid items={pinned} />
       </div>
@@ -1409,7 +1441,7 @@ function EntryDetails({
       <div className="mt-5">
         <div className="flex items-center justify-between mb-2">
           <h3 className="text-sm font-semibold">全部欄位</h3>
-          <Badge variant="outline">{entries.length} 個</Badge>
+          <Badge variant="outline">{formatNumber(entries.length)} 個</Badge>
         </div>
         <FieldGrid items={[...pinned, ...others]} />
       </div>
@@ -1417,7 +1449,7 @@ function EntryDetails({
       <div className="mt-5">
         <h3 className="mb-2 text-sm font-semibold">Raw</h3>
         <pre className="p-3 overflow-auto text-xs leading-5 border rounded-md max-h-56 bg-muted text-foreground">
-          {entry.raw}
+          {formatNumericText(entry.raw)}
         </pre>
       </div>
     </aside>
@@ -1446,7 +1478,7 @@ function FieldGrid({ items }: { items: ReadonlyArray<readonly [string, string | 
       {items.map(([key, value]) => (
         <div key={key} className="grid grid-cols-[minmax(92px,0.4fr)_minmax(0,1fr)] border-b last:border-b-0 sm:grid-cols-[120px_1fr]">
           <div className="px-3 py-2 text-xs font-medium bg-muted/60 text-muted-foreground">{key}</div>
-          <div className="min-w-0 px-3 py-2 font-mono text-xs break-words">{value}</div>
+          <div className="min-w-0 px-3 py-2 font-mono text-xs break-words">{formatNumericText(value)}</div>
         </div>
       ))}
     </div>
@@ -1465,7 +1497,9 @@ function DetailItem({
   return (
     <div className="p-3 border rounded-md bg-background">
       <div className="mb-1 text-xs font-medium text-muted-foreground">{label}</div>
-      <div className={multiline ? "break-words text-sm" : "truncate font-mono text-xs"}>{value}</div>
+      <div className={multiline ? "break-words text-sm" : "truncate font-mono text-xs"}>
+        {formatNumericText(value)}
+      </div>
     </div>
   );
 }
@@ -1585,9 +1619,26 @@ function sumReportField<T extends Record<K, number>, K extends keyof T>(items: T
 }
 
 function formatBytes(bytes: number) {
-  if (bytes < 1024) return `${bytes} B`;
-  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
-  return `${(bytes / 1024 / 1024).toFixed(1)} MB`;
+  if (bytes < 1024) return `${formatNumber(bytes)} B`;
+  if (bytes < 1024 * 1024) return `${formatDecimal(bytes / 1024, 1)} KB`;
+  return `${formatDecimal(bytes / 1024 / 1024, 1)} MB`;
+}
+
+function formatNumber(value: number) {
+  return value.toLocaleString("zh-TW");
+}
+
+function formatDecimal(value: number, fractionDigits: number) {
+  return value.toLocaleString("zh-TW", {
+    minimumFractionDigits: fractionDigits,
+    maximumFractionDigits: fractionDigits
+  });
+}
+
+function formatNumericText(value: string | undefined) {
+  if (!value) return value ?? "";
+
+  return value.replace(/(?<![\w./:-])\d{4,}(?![\w./:-])/g, (match) => formatNumber(Number(match)));
 }
 
 function parseDateOnly(value: string) {
